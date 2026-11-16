@@ -20,6 +20,13 @@ The lab guide specifies `us-east-1`. This deployment uses **`eu-north-1`**.
 - **Impact on controls:** none. All five controls are implemented identically; only the provider region changed.
 - **Verification commands** use `--region eu-north-1` instead of `us-east-1`.
 
+## Documented deviation: cleanup on Windows
+
+The lab guide empties the log bucket by piping `list-object-versions` into `delete-objects --delete file:///dev/stdin`. On Windows the AWS CLI is a native executable and cannot read `/dev/stdin` (error: `Unable to load paramfile file:///dev/stdin`), even with `MSYS_NO_PATHCONV=1`.
+
+- **Outcome:** `terraform destroy` still completed cleanly (`Destroy complete! Resources: 11 destroyed.`). If it ever fails with `BucketNotEmpty`, the log bucket (not versioned) can be emptied with `aws s3 rm "s3://$LOG_BUCKET" --recursive --profile default` and destroy re-run.
+- **Impact on controls:** none. Cleanup only; the captured evidence is unchanged.
+
 ## Usage
 
 ```bash
